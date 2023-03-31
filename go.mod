@@ -1,4 +1,4 @@
-module github.com/OrlovM/resultgroup
+module github.com/orlovm/resultgroup
 
 go 1.20
 
