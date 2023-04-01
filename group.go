@@ -6,8 +6,8 @@ import (
 )
 
 // Group is a generic struct that holds errors and results from concurrent tasks.
-// To create a Group without a context and error limit, use the struct directly:
-// group := resultgroup.Group[int]{}
+// To create a Group without a context and error threshold, use the struct directly:
+// group := resultgroup.Group[T]{}
 type Group[T any] struct {
 	mutex     sync.Mutex
 	errs      []error
@@ -19,6 +19,7 @@ type Group[T any] struct {
 
 // WithErrorsThreshold creates a new Group with the provided context and a threshold for the maximum number of errors.
 // If the threshold is reached, the context will be canceled.
+// Threshold must be greater than or equal to 1.
 func WithErrorsThreshold[T any](ctx context.Context, threshold int) (Group[T], context.Context) {
 	if threshold < 1 {
 		panic("threshold must be greater than or equal to 1")
@@ -30,7 +31,6 @@ func WithErrorsThreshold[T any](ctx context.Context, threshold int) (Group[T], c
 }
 
 // Go runs the provided function in a new goroutine and manages errors and results.
-// If the function returns an error, it is added to the Group's error list.
 func (g *Group[T]) Go(f func() ([]T, error)) {
 	g.wg.Add(1)
 
@@ -75,7 +75,7 @@ func (g *Group[T]) appendResults(res []T) {
 }
 
 // Wait blocks until all function calls from the Go method have returned, then
-// returns the appended results and a multiError containing all errors, if any.
+// returns the concatenated results and a wrapped error containing all errors that are below the threshold.
 func (g *Group[T]) Wait() ([]T, errorWithUnwrap) {
 	g.wg.Wait()
 	g.mutex.Lock()
