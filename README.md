@@ -1,5 +1,9 @@
 # resultGroup
 
+[![CI](https://github.com/orlovm/resultgroup/actions/workflows/go.yml/badge.svg)](https://github.com/orlovm/resultgroup/actions/workflows/go.yml)
+[![codebeat badge](https://codebeat.co/badges/712c7ef7-4ac9-4df9-96b0-bd5c2d547e30)](https://codebeat.co/projects/github-com-orlovm-resultgroup-main)
+[![GitHub release](https://img.shields.io/github/release/orlovm/resultgroup.svg?label=version)](https://github.com/orlovm/resultgroup/releases/latest)  
+
 resultGroup is a simple and flexible Go library for managing the results and errors of concurrent tasks. It is inspired by the beloved HashiCorp's [go-multierror/Group](https://github.com/hashicorp/go-multierror/blob/master/group.go).
 
 ## Motivation
