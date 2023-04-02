@@ -17,7 +17,8 @@ type Group[T any] struct {
 	results   []T
 }
 
-// WithErrorsThreshold creates a new Group with the provided context and a threshold for the maximum number of errors.
+// WithErrorsThreshold creates a new Group with the provided context
+// and a threshold for the maximum number of errors.
 // If the threshold is reached, the context will be canceled.
 // Threshold must be greater than or equal to 1.
 func WithErrorsThreshold[T any](ctx context.Context, threshold int) (Group[T], context.Context) {
@@ -30,7 +31,10 @@ func WithErrorsThreshold[T any](ctx context.Context, threshold int) (Group[T], c
 	return Group[T]{cancel: cancel, threshold: threshold}, ctx
 }
 
-// Go runs the provided function in a new goroutine and manages errors and results.
+// Go runs the provided function in a new goroutine and append the results
+// to aggregated slice that will be returned by Wait.
+// If the function returns an error, it will be appended to the aggregated
+// slice of errors if the threshold is not reached.
 func (g *Group[T]) Go(f func() ([]T, error)) {
 	g.wg.Add(1)
 
@@ -42,7 +46,6 @@ func (g *Group[T]) Go(f func() ([]T, error)) {
 	}()
 }
 
-// processResult handles the results and errors returned by the goroutine.
 func (g *Group[T]) processResult(res []T, err error) {
 	if err != nil {
 		g.handleErrors(err)
@@ -51,7 +54,6 @@ func (g *Group[T]) processResult(res []T, err error) {
 	g.appendResults(res)
 }
 
-// handleErrors manages errors returned by the goroutine and cancels the context if the error threshold is reached.
 func (g *Group[T]) handleErrors(err error) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
@@ -67,7 +69,6 @@ func (g *Group[T]) handleErrors(err error) {
 	}
 }
 
-// appendResults appends the results returned by the goroutine to the Group's results list.
 func (g *Group[T]) appendResults(res []T) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
@@ -75,7 +76,8 @@ func (g *Group[T]) appendResults(res []T) {
 }
 
 // Wait blocks until all function calls from the Go method have returned, then
-// returns the concatenated results and a wrapped error containing all errors that are below the threshold.
+// returns the concatenated results and a multiError containing all errors that
+// are below the threshold.
 func (g *Group[T]) Wait() ([]T, errorWithUnwrap) {
 	g.wg.Wait()
 	g.mutex.Lock()
