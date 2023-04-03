@@ -54,6 +54,8 @@ group.Go(func() ([]ResultType, error) {
 results, err := group.Wait()
 ```
 
+`err` could be used as usual go 1.20 wrapped error, or be easily unwrapped with `Unwrap() []error`
+
 Here's a complete example that demonstrates how to use Result Group to fetch data from multiple sources concurrently:
 
 ```go
@@ -97,6 +99,7 @@ func main() {
 	results, err := group.Wait()
 	if err != nil {
 		fmt.Println("Error:", err)
+                fmt.Println("Wrapped errors", err.Unwrap())
 	}
 
 	for _, result := range results {
